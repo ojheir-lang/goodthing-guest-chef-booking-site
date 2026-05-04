@@ -449,6 +449,8 @@ footer{background:var(--ink);padding:3rem 2.5rem;display:flex;justify-content:sp
             <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
           </select>
         </div>
+        <div class="ff full"><label class="fl">Select Your Night</label>
+          <select class="fi" id="fDate" required><option value="">Choose a date</option></select></div>
         <div class="ff full"><label class="fl">Dietary Notes (optional)</label><input class="fi" id="fD" type="text" placeholder="Vegetarian, allergies, etc."></div>
       </div>
       <button type="submit" class="act-btn" style="max-width:560px;margin-top:1.4rem">Continue to Payment</button>
@@ -592,8 +594,33 @@ function pick(t,el){
   document.getElementById('nBtn').disabled=false;
 }
 
+function parseDateRange(str){
+  const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11,
+    January:0,February:1,March:2,April:3,June:5,July:6,August:7,September:8,October:9,November:10,December:11};
+  const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const fmtLabel=d=>d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long'});
+  // Patterns: "17 — 24 May 2026"  or  "30 May — 20 June 2026"
+  let m=str.match(/(\d+)\s*[—–-]\s*(\d+)\s+(\w+)\s+(\d{4})/);
+  if(m){
+    const yr=parseInt(m[4]),mo=months[m[3]],s=parseInt(m[1]),e=parseInt(m[2]);
+    const dates=[];for(let d=s;d<=e;d++){const dt=new Date(yr,mo,d);dates.push({val:fmt(dt),label:fmtLabel(dt)});}
+    return dates;
+  }
+  m=str.match(/(\d+)\s+(\w+)\s*[—–-]\s*(\d+)\s+(\w+)\s+(\d{4})/);
+  if(m){
+    const yr=parseInt(m[5]),mo1=months[m[2]],mo2=months[m[4]],s=parseInt(m[1]),e=parseInt(m[3]);
+    const dates=[];
+    for(let d=s;d<=31;d++){try{const dt=new Date(yr,mo1,d);if(dt.getMonth()===mo1)dates.push({val:fmt(dt),label:fmtLabel(dt)});}catch(x){}}
+    for(let d=1;d<=e;d++){const dt=new Date(yr,mo2,d);dates.push({val:fmt(dt),label:fmtLabel(dt)});}
+    return dates;
+  }
+  return[];
+}
 function openModal(id){
   aC=chefs.find(c=>c.id===id);aS=null;gI={};
+  const sel=document.getElementById('fDate');
+  sel.innerHTML='<option value="">Choose a date</option>';
+  parseDateRange(aC.date).forEach(({val,label})=>{const o=document.createElement('option');o.value=val;o.textContent=label;sel.appendChild(o);});
   document.getElementById('modal').classList.add('open');
   document.getElementById('mLabel').textContent=`${aC.name} · ${aC.date}`;
   document.getElementById('sEmpty').style.display='block';
@@ -617,7 +644,7 @@ function renderSum(){
 }
 function onForm(e){
   e.preventDefault();
-  gI={first:document.getElementById('fN').value,last:document.getElementById('lN').value,email:document.getElementById('fE').value,phone:document.getElementById('fP').value,guests:document.getElementById('fG').value,diet:document.getElementById('fD').value};
+  gI={first:document.getElementById('fN').value,last:document.getElementById('lN').value,email:document.getElementById('fE').value,phone:document.getElementById('fP').value,guests:document.getElementById('fG').value,diet:document.getElementById('fD').value,date:document.getElementById('fDate').value};
   goStep(2);
 }
 function renderPay(){
@@ -628,12 +655,46 @@ function renderPay(){
   document.getElementById('pG').textContent=`${g} guest${g>1?'s':''}`;
   document.getElementById('pT').textContent=`$${aC.price*g}`;
 }
-function onPay(){
+async function onPay(){
+  const btn=document.querySelector('#pane2 .act-btn');
+  if(btn){btn.disabled=true;btn.textContent='Confirming…';}
   const ref='GT-'+Math.random().toString(36).substring(2,8).toUpperCase();
-  const p=new URLSearchParams({chef:aC.name,date:aC.date,seat:aS?.id||'',guests:gI.guests||1,name:`${gI.first} ${gI.last}`,email:gI.email,ref,source:'guest-chef-site'});
+  const g=parseInt(gI.guests)||1;
+  const seatId=aS?.id||'';
+  const sectionMap={C:'Couch',B:'Main Bar',OD:'Outdoor',T:'Terrace',FB:'Flying Bar'};
+  const secKey=seatId.replace(/[0-9]/g,'');
+  const section=sectionMap[secKey]||'Couch';
+  const reservation={
+    id:crypto.randomUUID(),
+    first_name:gI.first,
+    last_name:gI.last,
+    phone:gI.phone||'',
+    email:gI.email||null,
+    date:gI.date,
+    time:'19:00',
+    pax:g,
+    section:section,
+    table_name:seatId,
+    status:'confirmed',
+    staff:'online',
+    notes:'Guest Chef: '+aC.name+(gI.diet?' | '+gI.diet:''),
+    min_charge:75*g,
+    source:'online',
+    created_at:new Date().toISOString()
+  };
+  try{
+    const r=await fetch('https://skgwffqcejardjebbpys.supabase.co/rest/v1/reservations',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrZ3dmZnFjZWphcmRqZWJicHlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNTg0ODIsImV4cCI6MjA5MTkzNDQ4Mn0.4VS2q1swAaEC_FSISzvnMsbZnyRgm06sAh2Ttot3fEk','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrZ3dmZnFjZWphcmRqZWJicHlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNTg0ODIsImV4cCI6MjA5MTkzNDQ4Mn0.4VS2q1swAaEC_FSISzvnMsbZnyRgm06sAh2Ttot3fEk','Prefer':'return=minimal'},
+      body:JSON.stringify(reservation)
+    });
+    if(!r.ok){const e=await r.text();console.error('Supabase error:',e);}
+  }catch(e){console.error('Booking error:',e);}
+  const p=new URLSearchParams({chef:aC.name,date:aC.date,seat:seatId,guests:g,name:`${gI.first} ${gI.last}`,email:gI.email,ref,source:'guest-chef-site'});
   document.getElementById('cE').textContent=gI.email;
   document.getElementById('cR').textContent=`Booking Reference: ${ref}`;
   document.getElementById('cL').href=BU+'?'+p.toString();
+  if(btn){btn.disabled=false;btn.textContent='Pay Now';}
   goStep(3);
 }
 
