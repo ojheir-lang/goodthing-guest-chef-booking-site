@@ -233,6 +233,58 @@ footer{background:var(--ink);padding:3rem 2.5rem;display:flex;justify-content:sp
 #nav.scrolled .nav-dropdown-menu{background:var(--cream);border-color:rgba(13,12,8,.1);}
 #nav.scrolled .nav-dropdown-item{color:var(--dim);}
 #nav.scrolled .nav-dropdown-item:hover{color:var(--ink);background:rgba(13,12,8,.04);}
+
+/* ── HANDWRITE HERO ── */
+.hero-handwrite{
+  position:relative;
+  width:min(820px,90vw);
+  margin:0 auto 1.5rem;
+}
+.hw-svg{
+  width:100%;
+  display:block;
+}
+.hw-path{
+  stroke-dasharray: 3000;
+  stroke-dashoffset: 3000;
+  animation: drawPath 2.8s cubic-bezier(0.43,0.13,0.23,0.96) 0.3s forwards;
+}
+@keyframes drawPath{
+  to { stroke-dashoffset: 0; }
+}
+.hw-text{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.4rem;
+  padding-bottom:2rem;
+}
+.hw-line1{
+  font-family:'Libertinus Serif',serif;
+  font-size:clamp(2.4rem,5.5vw,5rem);
+  color:rgba(240,235,225,1);
+  letter-spacing:-.01em;
+  line-height:1;
+  opacity:0;
+  animation: fadeUp .9s ease 1.2s forwards;
+}
+.hw-line2{
+  font-family:'Libertinus Serif',serif;
+  font-style:italic;
+  font-size:clamp(2.4rem,5.5vw,5rem);
+  color:rgba(240,235,225,1);
+  letter-spacing:-.01em;
+  line-height:1;
+  opacity:0;
+  animation: fadeUp .9s ease 1.6s forwards;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(14px);}
+  to{opacity:1;transform:translateY(0);}
+}
 </style>
 </head>
 <body>
@@ -262,7 +314,22 @@ footer{background:var(--ink);padding:3rem 2.5rem;display:flex;justify-content:sp
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="hero-label">Beirut · 2026 · The Programme</div>
-    <h1 class="hero-title">An evening<br><em>with the chef.</em></h1>
+    <div class="hero-handwrite">
+      <svg class="hw-svg" viewBox="0 0 1200 540" xmlns="http://www.w3.org/2000/svg">
+        <path class="hw-path" id="hwPath"
+          d="M 950 90 
+             C 1250 300, 1050 460, 600 500
+             C 250 500, 150 460, 150 280
+             C 150 110, 350 70, 600 70
+             C 850 70, 950 170, 950 170"
+          fill="none" stroke="rgba(240,235,225,0.75)" stroke-width="6"
+          stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="hw-text">
+        <span class="hw-line1">An evening</span>
+        <em class="hw-line2">with the chef.</em>
+      </div>
+    </div>
     <div class="hero-meta">
       <span class="hero-meta-item">4 Nights</span>
       <div class="hero-meta-sep"></div>
