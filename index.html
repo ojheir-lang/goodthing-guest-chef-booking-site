@@ -285,6 +285,78 @@ footer{background:var(--ink);padding:3rem 2.5rem;display:flex;justify-content:sp
   from{opacity:0;transform:translateY(14px);}
   to{opacity:1;transform:translateY(0);}
 }
+
+/* ── HAMBURGER BUTTON ── */
+.hb-btn{
+  background:none;border:1px solid rgba(240,235,225,.3);
+  border-radius:6px;padding:7px 9px;cursor:pointer;
+  color:rgba(240,235,225,.85);transition:border-color .3s,color .3s;
+  display:flex;align-items:center;justify-content:center;
+}
+#nav.scrolled .hb-btn{color:var(--ink);border-color:rgba(13,12,8,.25);}
+.hb-btn:hover{border-color:currentColor;}
+.hb-icon .hb-top{
+  transform-origin:center;
+  transform:translateY(-7px);
+  transition:transform .3s cubic-bezier(.5,.85,.25,1.1),rotate .3s cubic-bezier(.5,.85,.25,1.1);
+}
+.hb-icon .hb-mid{
+  transform-origin:center;
+  transition:opacity .15s,rotate .3s cubic-bezier(.5,.85,.25,1.8);
+}
+.hb-icon .hb-bottom{
+  transform-origin:center;
+  transform:translateY(7px);
+  transition:transform .3s cubic-bezier(.5,.85,.25,1.1),rotate .3s cubic-bezier(.5,.85,.25,1.1);
+}
+/* open state */
+.hb-btn[aria-expanded="true"] .hb-top{transform:translateY(0) rotate(315deg);}
+.hb-btn[aria-expanded="true"] .hb-mid{opacity:0;}
+.hb-btn[aria-expanded="true"] .hb-bottom{transform:translateY(0) rotate(135deg);}
+
+/* ── FULL-SCREEN CHEF MENU ── */
+.chef-menu{
+  position:fixed;inset:0;z-index:150;
+  background:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .35s ease;
+}
+.chef-menu.open{opacity:1;pointer-events:all;}
+.chef-menu-inner{text-align:center;}
+.chef-menu-label{
+  font-family:'Oswald',sans-serif;font-size:.6rem;
+  letter-spacing:.25em;text-transform:uppercase;
+  color:rgba(240,235,225,.35);margin-bottom:2.5rem;
+}
+.chef-menu-list{display:flex;flex-direction:column;gap:.3rem;}
+.chef-menu-item{
+  background:none;border:none;cursor:pointer;
+  font-family:'Libertinus Serif',serif;
+  font-size:clamp(3rem,7vw,6rem);
+  color:rgba(240,235,225,.15);
+  line-height:1.1;
+  transition:color .25s, transform .25s;
+  transform:translateY(18px);
+  opacity:0;
+  transition:opacity .35s ease calc(var(--i)*60ms + .15s),
+             transform .35s ease calc(var(--i)*60ms + .15s),
+             color .2s;
+}
+.chef-menu.open .chef-menu-item{opacity:1;transform:translateY(0);}
+.chef-menu-item:hover{color:rgba(240,235,225,1);}
+.chef-menu-book{
+  margin-top:3rem;
+  background:none;border:1px solid rgba(240,235,225,.3);
+  color:rgba(240,235,225,.7);padding:.6rem 1.8rem;
+  font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:.2em;
+  text-transform:uppercase;cursor:pointer;
+  transition:border-color .25s,color .25s;
+  opacity:0;transform:translateY(10px);
+  transition:opacity .35s ease .55s,transform .35s ease .55s,border-color .25s,color .25s;
+}
+.chef-menu.open .chef-menu-book{opacity:1;transform:translateY(0);}
+.chef-menu-book:hover{border-color:rgba(240,235,225,.8);color:rgba(240,235,225,1);}
 </style>
 </head>
 <body>
@@ -293,20 +365,33 @@ footer{background:var(--ink);padding:3rem 2.5rem;display:flex;justify-content:sp
 <nav id="nav">
   <div class="nav-logo">Good <em>Thing</em></div>
   <div class="nav-links">
-    <div class="nav-dropdown">
-      <button class="nav-link nav-dropdown-trigger" onclick="toggleDropdown(event)">The Chefs <span class="nav-arrow">▾</span></button>
-      <div class="nav-dropdown-menu" id="chefDropdown">
-        <button class="nav-dropdown-item" onclick="goToChef('luis')">Luis</button>
-        <button class="nav-dropdown-item" onclick="goToChef('dani')">Dani</button>
-        <button class="nav-dropdown-item" onclick="goToChef('robert')">Robert</button>
-        <button class="nav-dropdown-item" onclick="goToChef('philipp')">Philipp</button>
-        <button class="nav-dropdown-item" onclick="goToChef('bjorn')">Bjorn</button>
-        <button class="nav-dropdown-item" onclick="goToChef('ben')">Ben</button>
-      </div>
-    </div>
     <button class="nav-link nav-book-btn" onclick="openModal(0)">Book Now</button>
+    <button class="hb-btn" id="hbBtn" onclick="toggleMenu()" aria-expanded="false" aria-label="Open menu">
+      <svg class="hb-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path class="hb-top"    d="M4 12L20 12"/>
+        <path class="hb-mid"    d="M4 12H20"/>
+        <path class="hb-bottom" d="M4 12H20"/>
+      </svg>
+    </button>
   </div>
 </nav>
+
+<!-- FULL-SCREEN CHEF MENU -->
+<div class="chef-menu" id="chefMenu">
+  <div class="chef-menu-inner">
+    <p class="chef-menu-label">The Chefs</p>
+    <nav class="chef-menu-list">
+      <button class="chef-menu-item" onclick="menuGoTo('luis')"   style="--i:0">Luis</button>
+      <button class="chef-menu-item" onclick="menuGoTo('dani')"   style="--i:1">Dani</button>
+      <button class="chef-menu-item" onclick="menuGoTo('robert')" style="--i:2">Robert</button>
+      <button class="chef-menu-item" onclick="menuGoTo('philipp')" style="--i:3">Philipp</button>
+      <button class="chef-menu-item" onclick="menuGoTo('bjorn')"  style="--i:4">Bjorn</button>
+      <button class="chef-menu-item" onclick="menuGoTo('ben')"    style="--i:5">Ben</button>
+    </nav>
+    <button class="chef-menu-book" onclick="openModal(0);toggleMenu()">Book Now →</button>
+  </div>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -796,6 +881,23 @@ function goToChef(id){
 document.addEventListener('click', function(){
   document.querySelectorAll('.nav-dropdown.open').forEach(d=>d.classList.remove('open'));
 });
+
+function toggleMenu(){
+  const btn  = document.getElementById('hbBtn');
+  const menu = document.getElementById('chefMenu');
+  const open = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', String(!open));
+  btn.setAttribute('aria-label', open ? 'Open menu' : 'Close menu');
+  menu.classList.toggle('open', !open);
+  document.body.style.overflow = open ? '' : 'hidden';
+}
+function menuGoTo(id){
+  toggleMenu();
+  setTimeout(()=>{
+    const el = document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:'smooth'});
+  }, 350);
+}
 </script>
 </body>
 </html>
