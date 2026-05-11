@@ -204,6 +204,35 @@ footer{background:var(--ink);padding:3rem 2.5rem;display:flex;justify-content:sp
 .ft-logo{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:rgba(240,235,225,.5);letter-spacing:.1em;}
 .ft-logo em{font-style:italic;color:var(--red);}
 .ft-copy{font-size:.58rem;letter-spacing:.12em;color:rgba(240,235,225,.22);}
+
+/* ── DROPDOWN NAV ── */
+.nav-dropdown{position:relative;}
+.nav-arrow{display:inline-block;transition:transform .25s;font-size:.55rem;margin-left:.3em;vertical-align:middle;}
+.nav-dropdown.open .nav-arrow{transform:rotate(180deg);}
+.nav-dropdown-menu{
+  position:absolute;top:calc(100% + 14px);left:50%;transform:translateX(-50%);
+  background:var(--ink);border:1px solid rgba(240,235,225,.1);
+  padding:.5rem 0;min-width:160px;z-index:200;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+  transform:translateX(-50%) translateY(-6px);
+}
+.nav-dropdown.open .nav-dropdown-menu{
+  opacity:1;pointer-events:all;
+  transform:translateX(-50%) translateY(0);
+}
+.nav-dropdown-item{
+  display:block;width:100%;text-align:left;padding:.55rem 1.4rem;
+  background:none;border:none;cursor:pointer;
+  font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:.2em;
+  text-transform:uppercase;color:rgba(240,235,225,.65);
+  transition:color .2s,background .2s;
+}
+.nav-dropdown-item:hover{color:var(--cream);background:rgba(240,235,225,.06);}
+.nav-book-btn{color:var(--red)!important;border:1px solid var(--red);padding:.4rem .9rem;}
+/* light mode overrides */
+#nav.scrolled .nav-dropdown-menu{background:var(--cream);border-color:rgba(13,12,8,.1);}
+#nav.scrolled .nav-dropdown-item{color:var(--dim);}
+#nav.scrolled .nav-dropdown-item:hover{color:var(--ink);background:rgba(13,12,8,.04);}
 </style>
 </head>
 <body>
@@ -212,11 +241,18 @@ footer{background:var(--ink);padding:3rem 2.5rem;display:flex;justify-content:sp
 <nav id="nav">
   <div class="nav-logo">Good <em>Thing</em></div>
   <div class="nav-links">
-    <button class="nav-link" onclick="scrollTo('philipp')">Philipp</button>
-    <button class="nav-link" onclick="scrollTo('dani')">Dani</button>
-    <button class="nav-link" onclick="scrollTo('bjorn')">Bjorn</button>
-    <button class="nav-link" onclick="scrollTo('robert')">Robert</button>
-    <button class="nav-link" style="color:var(--red)!important;border:1px solid var(--red);padding:.4rem .9rem;" onclick="openModal(1)">Book Now</button>
+    <div class="nav-dropdown">
+      <button class="nav-link nav-dropdown-trigger" onclick="toggleDropdown(event)">The Chefs <span class="nav-arrow">▾</span></button>
+      <div class="nav-dropdown-menu" id="chefDropdown">
+        <button class="nav-dropdown-item" onclick="goToChef('luis')">Luis</button>
+        <button class="nav-dropdown-item" onclick="goToChef('dani')">Dani</button>
+        <button class="nav-dropdown-item" onclick="goToChef('robert')">Robert</button>
+        <button class="nav-dropdown-item" onclick="goToChef('philipp')">Philipp</button>
+        <button class="nav-dropdown-item" onclick="goToChef('bjorn')">Bjorn</button>
+        <button class="nav-dropdown-item" onclick="goToChef('ben')">Ben</button>
+      </div>
+    </div>
+    <button class="nav-link nav-book-btn" onclick="openModal(0)">Book Now</button>
   </div>
 </nav>
 
@@ -677,6 +713,22 @@ async function onPay(){
 }
 
 buildFloor();
+
+function toggleDropdown(e){
+  e.stopPropagation();
+  const dd = e.currentTarget.closest('.nav-dropdown');
+  dd.classList.toggle('open');
+}
+function goToChef(id){
+  // close dropdown
+  document.querySelectorAll('.nav-dropdown').forEach(d=>d.classList.remove('open'));
+  const el = document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth'});
+}
+// close dropdown on outside click
+document.addEventListener('click', function(){
+  document.querySelectorAll('.nav-dropdown.open').forEach(d=>d.classList.remove('open'));
+});
 </script>
 </body>
 </html>
