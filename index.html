@@ -466,6 +466,93 @@ footer{background:var(--ink);padding:3rem 2.5rem;display:flex;justify-content:sp
   .founder-msg{flex-direction:column;padding:2.5rem 1.5rem;gap:2rem;text-align:center;}
   .founder-photo-wrap{width:140px;height:180px;}
 }
+
+/* ── ARCHIVE SECTION ── */
+.archive-section{
+  background:var(--ink);
+  padding:6rem 2.5rem;
+}
+.archive-header{
+  text-align:center;
+  margin-bottom:4rem;
+}
+.archive-label{
+  font-family:'Oswald',sans-serif;
+  font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;
+  color:rgba(240,235,225,.35);margin-bottom:1rem;
+}
+.archive-title{
+  font-family:'Libertinus Serif',serif;
+  font-size:clamp(2rem,4vw,3.2rem);
+  color:rgba(240,235,225,.95);
+  margin-bottom:.8rem;
+}
+.archive-sub{
+  font-family:'Oswald',sans-serif;
+  font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(240,235,225,.3);
+}
+.archive-list{
+  max-width:900px;margin:0 auto;
+  display:flex;flex-direction:column;
+}
+.archive-row{
+  display:grid;
+  grid-template-columns:3rem 1fr auto auto;
+  align-items:center;
+  gap:1.5rem 2rem;
+  padding:2rem 0;
+  border-top:1px solid rgba(240,235,225,.08);
+  transition:background .2s;
+}
+.archive-row:last-child{border-bottom:1px solid rgba(240,235,225,.08);}
+.archive-row-num{
+  font-family:'Oswald',sans-serif;
+  font-size:.65rem;letter-spacing:.15em;
+  color:rgba(240,235,225,.2);
+}
+.archive-row-info{display:flex;flex-direction:column;gap:.3rem;}
+.archive-row-cuisine{
+  font-family:'Oswald',sans-serif;
+  font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(240,235,225,.35);
+}
+.archive-row-name{
+  font-family:'Libertinus Serif',serif;
+  font-size:1.4rem;
+  color:rgba(240,235,225,.9);
+  line-height:1.1;
+}
+.archive-row-detail{
+  font-family:'Oswald',sans-serif;
+  font-size:.6rem;letter-spacing:.05em;
+  color:rgba(240,235,225,.4);
+  max-width:440px;line-height:1.6;
+  margin-top:.2rem;
+}
+.archive-row-date{
+  font-family:'Oswald',sans-serif;
+  font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(240,235,225,.4);
+  white-space:nowrap;
+}
+.archive-row-link{
+  font-family:'Oswald',sans-serif;
+  font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(240,235,225,.3);
+  text-decoration:none;
+  border:1px solid rgba(240,235,225,.15);
+  padding:.4rem .8rem;
+  transition:color .2s,border-color .2s;
+  white-space:nowrap;
+}
+.archive-row-link:hover{color:rgba(240,235,225,.9);border-color:rgba(240,235,225,.5);}
+@media(max-width:640px){
+  .archive-row{grid-template-columns:1fr auto;grid-template-rows:auto auto;}
+  .archive-row-num{display:none;}
+  .archive-row-date{text-align:right;}
+  .archive-row-link{grid-column:2;grid-row:2;}
+}
 </style>
 </head>
 <body>
@@ -728,6 +815,51 @@ footer{background:var(--ink);padding:3rem 2.5rem;display:flex;justify-content:sp
   </div>
 </section>
 
+
+<!-- ARCHIVE -->
+<section class="archive-section">
+  <div class="archive-header">
+    <p class="archive-label">The Record</p>
+    <h2 class="archive-title">Past Evenings</h2>
+    <p class="archive-sub">Every chef who has cooked at Good Thing. Every night that happened.</p>
+  </div>
+  <div class="archive-list">
+
+    <div class="archive-row">
+      <div class="archive-row-num">01</div>
+      <div class="archive-row-info">
+        <div class="archive-row-cuisine">Spanish</div>
+        <div class="archive-row-name">Víctor Gonzalo</div>
+        <div class="archive-row-detail">Michelin-starred chef from Madrid. Modern Castilian cuisine rooted in ancestral fire techniques and local ingredients. Founder of Ancestral.</div>
+      </div>
+      <div class="archive-row-date">January 2026</div>
+      <a class="archive-row-link" href="https://www.goodthing-studio.com/spanish-nights-1" target="_blank">View ↗</a>
+    </div>
+
+    <div class="archive-row">
+      <div class="archive-row-num">02</div>
+      <div class="archive-row-info">
+        <div class="archive-row-cuisine">Peruvian</div>
+        <div class="archive-row-name">Álvaro Vásquez</div>
+        <div class="archive-row-detail">Lima-born, Mexico City-based. Peruvian flavours fused with Asian influences. Worked at Central, Pujol, Astrid y Gastón. Executive Chef at ARRRCO.</div>
+      </div>
+      <div class="archive-row-date">November 2025</div>
+      <a class="archive-row-link" href="https://www.goodthing-studio.com/peruvian-nights" target="_blank">View ↗</a>
+    </div>
+
+    <div class="archive-row">
+      <div class="archive-row-num">03</div>
+      <div class="archive-row-info">
+        <div class="archive-row-cuisine">Mexican</div>
+        <div class="archive-row-name">Allan Yáñez</div>
+        <div class="archive-row-detail">A defining night in the series — bold, smoke-forward Mexican cooking that set the tone for everything that followed.</div>
+      </div>
+      <div class="archive-row-date">September 2025</div>
+      <a class="archive-row-link" href="https://www.goodthing-studio.com/mexican-nights" target="_blank">View ↗</a>
+    </div>
+
+  </div>
+</section>
 
 <!-- FOOTER -->
 <footer>
