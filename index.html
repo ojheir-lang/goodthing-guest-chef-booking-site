@@ -646,9 +646,9 @@ footer{
 
 <!-- NAV -->
 <nav id="nav">
-  <a class="nav-logo" href="#" onclick="scrollToTop()">Good <em>Thing</em></a>
+  <a class="nav-logo" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});">Good <em>Thing</em></a>
   <div class="nav-right">
-    <button class="nav-book" onclick="openBkPage()">Book Now</button>
+    <button class="nav-book" data-action="bkpage">Book Now</button>
     <button class="hb-btn" id="hbBtn" onclick="toggleMenu(event)" aria-expanded="false" aria-label="Menu">
       <svg class="hb-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path class="hb-top" d="M4 12L20 12"/>
@@ -663,24 +663,24 @@ footer{
 <div class="nav-menu" id="navMenu">
   <div class="nm-inner">
     <div class="nm-links">
-      <button class="nm-link" onclick="menuAction('home')">Home</button>
-      <button class="nm-link" onclick="menuAction('story')">Our Story</button>
-      <button class="nm-link" onclick="menuAction('nextchef')">Next Chef</button>
-      <button class="nm-link" onclick="menuAction('prereg')">Pre-Registration</button>
+      <button class="nm-link" data-action="home">Home</button>
+      <button class="nm-link" data-action="page" data-target="pageStory">Our Story</button>
+      <button class="nm-link" data-action="nextchef">Next Chef</button>
+      <button class="nm-link" data-action="page" data-target="pagePreReg">Pre-Registration</button>
       <div class="nm-sub-wrap">
         <button class="nm-link nm-has-sub" onclick="toggleNmSub(event)">Upcoming Chefs <span class="nm-caret">↓</span></button>
         <div class="nm-sub" id="nmSub">
-          <button class="nm-sub-item" onclick="menuAction('chef','luis')">Luis</button>
-          <button class="nm-sub-item" onclick="menuAction('chef','dani')">Dani</button>
-          <button class="nm-sub-item" onclick="menuAction('chef','philipp')">Philipp</button>
-          <button class="nm-sub-item" onclick="menuAction('chef','robert')">Robert</button>
-          <button class="nm-sub-item" onclick="menuAction('chef','joanne')">Joanne</button>
-          <button class="nm-sub-item" onclick="menuAction('chef','bjorn')">Bjorn</button>
-          <button class="nm-sub-item" onclick="menuAction('chef','ben')">Ben</button>
+          <button class="nm-sub-item" data-target="luis">Luis</button>
+          <button class="nm-sub-item" data-target="dani">Dani</button>
+          <button class="nm-sub-item" data-target="philipp">Philipp</button>
+          <button class="nm-sub-item" data-target="robert">Robert</button>
+          <button class="nm-sub-item" data-target="joanne">Joanne</button>
+          <button class="nm-sub-item" data-target="bjorn">Bjorn</button>
+          <button class="nm-sub-item" data-target="ben">Ben</button>
         </div>
       </div>
-      <button class="nm-link" onclick="menuAction('archive')">Archives</button>
-      <button class="nm-link" onclick="menuAction('contact')">Contact Us</button>
+      <button class="nm-link" data-action="scroll" data-target="archive">Archives</button>
+      <button class="nm-link" data-action="page" data-target="pageContact">Contact Us</button>
     </div>
     <div class="nm-footer">
       <div class="nm-footer-logo">Good <em>Thing</em></div>
