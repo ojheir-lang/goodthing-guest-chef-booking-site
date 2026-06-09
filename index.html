@@ -1406,3 +1406,106 @@ if(document.getElementById('shuffleGrid')){
   requestAnimationFrame(tick);
 })();
 >
+</script>
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+  window.addEventListener('scroll', function() {
+    var nav = document.getElementById('nav');
+    if(nav) nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+  var hbBtn = document.getElementById('hbBtn');
+  var navMenu = document.getElementById('navMenu');
+  if(hbBtn && navMenu) {
+    hbBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var open = navMenu.classList.toggle('open');
+      hbBtn.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', function(e) {
+      if(!navMenu.contains(e.target) && !hbBtn.contains(e.target)) {
+        navMenu.classList.remove('open');
+        hbBtn.setAttribute('aria-expanded','false');
+      }
+    });
+  }
+  document.querySelectorAll('.nm-link:not(.nm-has-sub)').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var action = btn.getAttribute('data-action');
+      var target = btn.getAttribute('data-target');
+      closeNavM();
+      if(action==='home') window.scrollTo({top:0,behavior:'smooth'});
+      else if(action==='page') openPg(target);
+      else if(action==='scroll') {
+        var el=document.getElementById(target);
+        if(el) el.scrollIntoView({behavior:'smooth'});
+      }
+      else if(action==='nextchef') { buildNC(); openPg('pageNextChef'); }
+    });
+  });
+  document.querySelectorAll('.nm-has-sub').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      btn.classList.toggle('open');
+      var sub=document.getElementById('nmSub');
+      if(sub) sub.classList.toggle('open');
+    });
+  });
+  document.querySelectorAll('.nm-sub-item').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      closeNavM();
+      var el=document.getElementById(btn.getAttribute('data-target'));
+      if(el) el.scrollIntoView({behavior:'smooth'});
+    });
+  });
+  document.querySelectorAll('[data-action="bkpage"]').forEach(function(btn) {
+    btn.addEventListener('click', function() { openPg('bkPage'); });
+  });
+  document.querySelectorAll('.page-back').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var pg=btn.closest('.page');
+      if(pg) { pg.classList.remove('open'); document.body.style.overflow=''; }
+    });
+  });
+  var bkClose=document.querySelector('.bk-close');
+  if(bkClose) bkClose.addEventListener('click',function(){ closePg('bkPage'); });
+});
+
+function closeNavM() {
+  var nm=document.getElementById('navMenu'); if(nm) nm.classList.remove('open');
+  var b=document.getElementById('hbBtn'); if(b) b.setAttribute('aria-expanded','false');
+}
+function openPg(id) {
+  var pg=document.getElementById(id);
+  if(pg) { pg.classList.add('open'); document.body.style.overflow='hidden'; }
+}
+function closePg(id) {
+  var pg=document.getElementById(id);
+  if(pg) { pg.classList.remove('open'); document.body.style.overflow=''; }
+}
+function ncBook() { closePg('pageNextChef'); openPg('bkPage'); }
+function buildNC() {
+  var body=document.getElementById('nextChefBody'); if(!body) return;
+  var chef=null;
+  if(typeof chefs!=='undefined') chef=chefs.find(function(c){return c.bookable;});
+  if(!chef) return;
+  var img=document.querySelector('#'+chef.key+' .c-portrait');
+  var src=img ? img.src : '';
+  var cta = chef.bookable
+    ? '<button class="nc-book" onclick="ncBook()">Reserve Your Seat</button>'
+    : '<p class="c-soon">Coming soon</p>';
+  body.innerHTML=
+    '<div class="nc-visual"><img src="'+src+'" alt="'+chef.name+'"></div>'+
+    '<div class="nc-info">'+
+      '<p class="nc-eyebrow">Next Chef - Good Thing Beirut</p>'+
+      '<h1 class="nc-name">'+chef.name+'</h1>'+
+      '<span class="nc-tag">'+chef.cuisine+'</span>'+
+      '<div class="nc-date">'+chef.date+'</div>'+
+      '<p class="nc-bio">'+(chef.bio||'')+'</p>'+
+      cta+
+    '</div>';
+}
+
+</script>
+</body>
+</html>
