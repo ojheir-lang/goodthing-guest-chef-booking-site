@@ -145,28 +145,24 @@ button{cursor:pointer;font-family:inherit;}
   letter-spacing:.28em;text-transform:uppercase;
   color:rgba(240,235,225,.45);margin-bottom:2.5rem;
 }
-/* animated oval */
-.hero-oval{position:relative;width:min(760px,88vw);margin:0 auto;}
-.hw-svg{width:100%;display:block;}
-.hw-path{
-  stroke-dasharray:3000;stroke-dashoffset:3000;
-  animation:drawPath 2.6s cubic-bezier(.43,.13,.23,.96) .4s forwards;
+/* gooey morph hero */
+.gooey-wrap{position:relative;width:100%;margin:0 auto;}
+.gooey-svg{position:absolute;width:0;height:0;}
+.gooey-stage{
+  display:flex;align-items:center;justify-content:center;
+  height:clamp(120px,18vw,200px);
+  filter:url(#gooey-filter);
 }
-@keyframes drawPath{to{stroke-dashoffset:0;}}
-.hw-text{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  gap:.3rem;padding-bottom:1.5rem;
-}
-.hw-l1,.hw-l2{
+.gooey-t1,.gooey-t2{
+  position:absolute;
   font-family:'Chauncy',serif;
-  font-size:clamp(2.8rem,6.5vw,5.8rem);
-  color:var(--cream);line-height:1.05;
-  opacity:0;
+  font-size:clamp(3.5rem,9vw,8rem);
+  color:var(--cream);
+  text-align:center;
+  white-space:nowrap;
+  user-select:none;
+  line-height:1;
 }
-.hw-l1{animation:fadeUp .9s ease 1.3s forwards;}
-.hw-l2{animation:fadeUp .9s ease 1.7s forwards;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 /* meta bar */
 .hero-meta{
@@ -530,14 +526,21 @@ footer{
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <p class="hero-label">Beirut &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; The Programme</p>
-    <div class="hero-oval">
-      <svg class="hw-svg" viewBox="0 0 1200 520" xmlns="http://www.w3.org/2000/svg">
-        <path class="hw-path" d="M 950 90 C 1250 300, 1050 460, 600 500 C 250 500, 150 460, 150 280 C 150 110, 350 70, 600 70 C 850 70, 950 170, 950 170"
-          fill="none" stroke="rgba(240,235,225,.6)" stroke-width="5" stroke-linecap="round"/>
+    <div class="gooey-wrap">
+      <svg class="gooey-svg" aria-hidden="true">
+        <defs>
+          <filter id="gooey-filter">
+            <feColorMatrix in="SourceGraphic" type="matrix"
+              values="1 0 0 0 0
+                      0 1 0 0 0
+                      0 0 1 0 0
+                      0 0 0 255 -140"/>
+          </filter>
+        </defs>
       </svg>
-      <div class="hw-text">
-        <span class="hw-l1">An evening</span>
-        <span class="hw-l2">with the chef.</span>
+      <div class="gooey-stage">
+        <span class="gooey-t1" id="gt1"></span>
+        <span class="gooey-t2" id="gt2"></span>
       </div>
     </div>
     <div class="hero-meta">
@@ -1000,6 +1003,66 @@ function buildShuffleGrid(){
 }
 buildShuffleGrid();
 setInterval(buildShuffleGrid,3000);
+
+// ── Gooey Text Morph ──────────────────────────────────────────────────────
+(function(){
+  const texts = ['An', 'evening', 'with', 'the', 'chef.'];
+  const MORPH_TIME   = 1.2;
+  const COOLDOWN     = 1.8;
+  const t1 = document.getElementById('gt1');
+  const t2 = document.getElementById('gt2');
+  if(!t1||!t2) return;
+
+  let idx      = 0;
+  let morph    = 0;
+  let cooldown = COOLDOWN;
+  let last     = performance.now();
+
+  t1.textContent = texts[0];
+  t2.textContent = texts[1];
+
+  function setMorph(frac){
+    const blur2 = Math.min(8/frac - 8, 100);
+    t2.style.filter  = 'blur('+blur2+'px)';
+    t2.style.opacity = (Math.pow(frac,.4)*100)+'%';
+    const inv = 1-frac;
+    const blur1 = Math.min(8/inv - 8, 100);
+    t1.style.filter  = 'blur('+blur1+'px)';
+    t1.style.opacity = (Math.pow(inv,.4)*100)+'%';
+  }
+
+  function coolDown(){
+    morph = 0;
+    t2.style.filter  = '';
+    t2.style.opacity = '100%';
+    t1.style.filter  = '';
+    t1.style.opacity = '0%';
+  }
+
+  function tick(now){
+    requestAnimationFrame(tick);
+    const dt = (now - last) / 1000;
+    last = now;
+
+    cooldown -= dt;
+    if(cooldown <= 0){
+      if(cooldown + dt > 0){          // just crossed zero
+        idx = (idx+1) % texts.length;
+        t1.textContent = texts[idx];
+        t2.textContent = texts[(idx+1) % texts.length];
+      }
+      morph -= cooldown;
+      cooldown = 0;
+      let frac = morph / MORPH_TIME;
+      if(frac >= 1){ frac=1; cooldown=COOLDOWN; morph=0; }
+      setMorph(frac);
+      morph += dt;
+    } else {
+      coolDown();
+    }
+  }
+  requestAnimationFrame(tick);
+})();
 </script>
 </body>
 </html>
