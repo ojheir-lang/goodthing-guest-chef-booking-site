@@ -1307,6 +1307,14 @@ async function submitPreReg(e){
       body:JSON.stringify(data)
     });
   }catch(err){console.warn(err);}
+  try{
+    await fetch('https://script.google.com/macros/s/AKfycbw2JLCzTP6Ezdi5CgO-MYNen-Br_0_z_uk64g1zBEoWfYb9j5xVGvWXAYK6-nV8j4SO8A/exec',{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify(data)
+    });
+  }catch(err){console.warn(err);}
   document.querySelector('.prereg-form').style.display='none';
   document.getElementById('prThanks').style.display='block';
 }
