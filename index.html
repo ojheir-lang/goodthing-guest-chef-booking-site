@@ -496,6 +496,7 @@ button{cursor:pointer;font-family:inherit;}
   opacity:0;transform:translateY(6px);
   transition:opacity .4s ease, transform .4s ease;
   pointer-events:none;
+  z-index:10;
 }
 .stack-card:hover .stack-info,
 .stack-card.is-active .stack-info{opacity:1;transform:translateY(0);}
@@ -850,17 +851,6 @@ footer{
       <p class="prereg-eyebrow">Stay in the loop</p>
       <h1 class="prereg-title">Be the first<br>to know.</h1>
       <p class="prereg-desc">Dates and bookings for upcoming chefs will be announced soon. Register your interest and we will reach out the moment reservations open — before anyone else.</p>
-      <div class="prereg-chefs">
-        <p class="prereg-chefs-label">Upcoming chefs</p>
-        <div class="prereg-chef-tags">
-          <span class="prereg-tag">Dani · Mexican</span>
-          <span class="prereg-tag">Philipp · Japanese</span>
-          <span class="prereg-tag">Robert · Spanish</span>
-          <span class="prereg-tag">Joanne · Norwegian</span>
-          <span class="prereg-tag">Bjorn · Nordic</span>
-          <span class="prereg-tag">Ben · Levantine</span>
-        </div>
-      </div>
       <form class="prereg-form" onsubmit="submitPreReg(event)">
         <div class="prereg-row">
           <div class="prereg-field"><label>First Name</label><input id="prFirst" placeholder="First name" required></div>
@@ -872,12 +862,8 @@ footer{
           <label>Which chef(s) interest you most?</label>
           <select id="prChef">
             <option value="all">All of them</option>
-            <option value="dani">Dani — Mexican</option>
-            <option value="philipp">Philipp — Japanese</option>
-            <option value="robert">Robert — Spanish</option>
+            <option value="michael">Michael — Dutch</option>
             <option value="joanne">Joanne — Norwegian</option>
-            <option value="bjorn">Bjorn — Nordic</option>
-            <option value="ben">Ben — Levantine</option>
           </select>
         </div>
         <button type="submit" class="prereg-btn">Register Interest →</button>
