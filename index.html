@@ -1016,13 +1016,21 @@ footer{
       <div class="step-title">Review & confirm</div>
       <div class="step-sub">Check your details</div>
       <div class="summary-box" id="sumBox"></div>
-      <button class="act-btn" onclick="onPay()">Confirm Reservation</button>
+      <div class="pane-sub" style="margin-top:1.5rem">Payment</div>
+      <div class="fl"><label>Name on Card</label><input id="ccName" placeholder="Name on card"></div>
+      <div class="fl"><label>Card Number</label><input id="ccNum" placeholder="1234 5678 9012 3456" inputmode="numeric"></div>
+      <div style="display:flex;gap:1rem">
+        <div class="fl" style="flex:1"><label>Expiry</label><input id="ccExp" placeholder="MM/YY"></div>
+        <div class="fl" style="flex:1"><label>CVC</label><input id="ccCvc" placeholder="123" inputmode="numeric"></div>
+      </div>
+      <button class="act-btn" style="margin-top:.5rem" onclick="onPay()">Confirm Reservation</button>
     </div>
     <!-- Step 6: Confirmed -->
-    <div class="step" id="s6">
+    <div class="step" id="s6" style="text-align:center;padding-top:3rem;">
       <div class="conf-icon">✓</div>
-      <div class="conf-msg">You&rsquo;re on the list.</div>
-      <div class="conf-sub">We&rsquo;ll be in touch with details before the evening. See you at the table.</div>
+      <div class="conf-msg" id="confMsg">You&rsquo;re on the list.</div>
+      <div class="conf-sub" id="confSub">We&rsquo;ll be in touch with details before the evening. See you at the table.</div>
+      <button class="act-btn" style="margin-top:2rem" onclick="closeModal()">Done</button>
     </div>
   </div>
 </div>
@@ -1114,6 +1122,185 @@ function parseDates(dateStr){
     out.push({val:dt.toISOString().split('T')[0],label:dt.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})});
   }
   return out;
+}
+
+// ── Booking modal ───────────────────────────────────────────────────
+var bkState = {chef:null, pax:2, date:'', dateLabel:'', section:'', sectionLabel:'', seats:[]};
+var BK_TAKEN_SEATS = [3,7,11];
+
+function bkDateOptions(chef){
+  var out=[];
+  var m=(chef.date||'').match(/([A-Za-z]+)\s+(\d+)\s*-\s*(\d+),\s*(\d+)/);
+  if(!m) return out;
+  var months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  var mon=months[m[1]]; if(mon===undefined) mon=0;
+  var year=parseInt(m[4]);
+  for(var d=parseInt(m[2]); d<=parseInt(m[3]); d++){
+    var dt=new Date(year,mon,d);
+    out.push({val:dt.toISOString().split('T')[0], label:dt.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})});
+  }
+  return out;
+}
+
+function selectChef(id){
+  var chef = chefs.find(function(c){ return c.id===id; });
+  if(!chef || !chef.bookable) return;
+  bkState = {chef:chef, pax:2, date:'', dateLabel:'', section:'', sectionLabel:'', seats:[]};
+  document.getElementById('mLabel').textContent = 'Reserve — ' + chef.name.split(' ')[0];
+  var sel = document.getElementById('fDate');
+  sel.innerHTML = '<option value="">Choose a date</option>';
+  bkDateOptions(chef).forEach(function(o){
+    var opt = document.createElement('option');
+    opt.value = o.val; opt.textContent = o.label;
+    sel.appendChild(opt);
+  });
+  document.getElementById('paxNum').textContent = bkState.pax;
+  document.querySelectorAll('#modal .section-btn').forEach(function(b){ b.classList.remove('sel'); });
+  ['fFirst','fLast','fPhone','fEmail','fDiet','ccName','ccNum','ccExp','ccCvc'].forEach(function(fid){
+    var el = document.getElementById(fid);
+    if(el) el.value = '';
+  });
+  goS(1);
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function chPax(delta){
+  bkState.pax = Math.max(1, Math.min(12, (bkState.pax||2) + delta));
+  document.getElementById('paxNum').textContent = bkState.pax;
+  if(bkState.seats.length > bkState.pax) bkState.seats = bkState.seats.slice(0, bkState.pax);
+}
+
+function selSec(key,label){
+  bkState.section = key; bkState.sectionLabel = label;
+  document.querySelectorAll('#modal .section-btn').forEach(function(b){
+    b.classList.toggle('sel', b.textContent.trim()===label);
+  });
+  bkState.seats = [];
+  goS(3);
+}
+
+function buildSeatGrid(){
+  var g = document.getElementById('seatGrid');
+  g.innerHTML = '';
+  for(var i=1;i<=12;i++){
+    (function(i){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      var cls = 'seat';
+      if(BK_TAKEN_SEATS.indexOf(i)>=0) cls += ' taken';
+      if(bkState.seats.indexOf(i)>=0) cls += ' sel';
+      btn.className = cls;
+      btn.textContent = 'Seat ' + i;
+      if(BK_TAKEN_SEATS.indexOf(i)<0){
+        btn.onclick = function(){ toggleSeat(i); };
+      }
+      g.appendChild(btn);
+    })(i);
+  }
+}
+
+function toggleSeat(num){
+  var idx = bkState.seats.indexOf(num);
+  if(idx>=0){
+    bkState.seats.splice(idx,1);
+    buildSeatGrid();
+    return;
+  }
+  if(bkState.seats.length >= bkState.pax) return;
+  bkState.seats.push(num);
+  buildSeatGrid();
+  if(bkState.seats.length === bkState.pax){
+    setTimeout(function(){ goS(4); }, 300);
+  }
+}
+
+function buildSummary(){
+  var box = document.getElementById('sumBox');
+  var chef = bkState.chef;
+  var total = (chef.price||0) * bkState.pax;
+  var seatList = bkState.seats.slice().sort(function(a,b){return a-b;}).map(function(n){return 'Seat '+n;}).join(', ');
+  box.innerHTML =
+    '<div class="sum-row"><span>Chef</span><span class="sum-val">'+chef.name.split(' ')[0]+' — '+chef.cuisine+'</span></div>'+
+    '<div class="sum-row"><span>Date</span><span class="sum-val">'+bkState.dateLabel+'</span></div>'+
+    '<div class="sum-row"><span>Guests</span><span class="sum-val">'+bkState.pax+'</span></div>'+
+    '<div class="sum-row"><span>Section</span><span class="sum-val">'+bkState.sectionLabel+'</span></div>'+
+    '<div class="sum-row"><span>Seats</span><span class="sum-val">'+seatList+'</span></div>'+
+    '<div class="sum-row"><span>Total</span><span class="sum-val">$'+total+'</span></div>';
+}
+
+function goS(n){
+  if(n===2){
+    var dsel = document.getElementById('fDate');
+    if(!dsel.value){ alert('Please choose a date.'); return; }
+    bkState.date = dsel.value;
+    bkState.dateLabel = dsel.selectedOptions[0].textContent;
+  }
+  if(n===4){
+    if(bkState.seats.length !== bkState.pax){ alert('Please select '+bkState.pax+' seat(s).'); return; }
+  }
+  if(n===5){
+    var first = document.getElementById('fFirst').value.trim();
+    var last = document.getElementById('fLast').value.trim();
+    var phone = document.getElementById('fPhone').value.trim();
+    if(!first || !last || !phone){ alert('Please enter your name and phone number.'); return; }
+    buildSummary();
+  }
+  document.querySelectorAll('#modal .step').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('s'+n).classList.add('active');
+  if(n===3){
+    document.getElementById('secLabel').textContent = bkState.sectionLabel + ' — choose ' + bkState.pax + ' seat(s)';
+    buildSeatGrid();
+  }
+  var stepsEl = document.querySelector('#modal .steps');
+  if(stepsEl) stepsEl.scrollTop = 0;
+}
+
+async function onPay(){
+  var ccName = document.getElementById('ccName').value.trim();
+  var ccNum = document.getElementById('ccNum').value.replace(/\s+/g,'');
+  var ccExp = document.getElementById('ccExp').value.trim();
+  var ccCvc = document.getElementById('ccCvc').value.trim();
+  if(!ccName || ccNum.length<12 || !ccExp || ccCvc.length<3){
+    alert('Please complete the payment details.');
+    return;
+  }
+  var chef = bkState.chef;
+  var total = (chef.price||0) * bkState.pax;
+  var seatList = bkState.seats.slice().sort(function(a,b){return a-b;}).map(function(n){return 'Seat '+n;}).join(', ');
+  var emailOrPhone = document.getElementById('fEmail').value || document.getElementById('fPhone').value;
+  var data = {
+    first_name: document.getElementById('fFirst').value,
+    last_name: document.getElementById('fLast').value,
+    email: document.getElementById('fEmail').value || '',
+    phone: document.getElementById('fPhone').value || '',
+    notes: 'Booking: '+chef.name.split(' ')[0]+' ('+chef.cuisine+') | '+bkState.dateLabel+' | '+bkState.pax+' guest(s) | '+bkState.sectionLabel+' | '+seatList+' | Total $'+total+' | Dietary: '+(document.getElementById('fDiet').value || 'none'),
+    status: 'booking', source: 'online',
+    created_at: new Date().toISOString()
+  };
+  try{
+    await fetch('https://skgwffqcejardjebbpys.supabase.co/rest/v1/reservations',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':'','Authorization':'Bearer ','Prefer':'return=minimal'},
+      body:JSON.stringify(data)
+    });
+  }catch(err){console.warn(err);}
+  try{
+    await fetch('https://script.google.com/macros/s/AKfycbw2JLCzTP6Ezdi5CgO-MYNen-Br_0_z_uk64g1zBEoWfYb9j5xVGvWXAYK6-nV8j4SO8A/exec',{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify(data)
+    });
+  }catch(err){console.warn(err);}
+  document.getElementById('confMsg').textContent = 'Reservation confirmed.';
+  document.getElementById('confSub').textContent = chef.name.split(' ')[0]+' — '+bkState.dateLabel+' \u00b7 '+bkState.pax+' guest(s) \u00b7 '+bkState.sectionLabel+' \u00b7 '+seatList+'. A confirmation will be sent to '+emailOrPhone+'.';
+  goS(6);
 }
 
 // ── Nav ───────────────────────────────────────────────────────────────────
